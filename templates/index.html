@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boolean Simplifier | NIRAJ VERMA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="page-wrap">
+        <!-- top bar -->
+        <header class="topbar">
+            <div class="brand">
+                <span class="brand-mark">B</span>
+                <div>
+                    <div class="brand-title">Boolean Expression Simplifier</div>
+                    <div class="brand-sub">Digital Logic · Minor Project</div>
+                </div>
+            </div>
+            <div class="student-info">
+                <div class="s-name">NIRAJ VERMA</div>
+                <div class="s-no">Scholar No: 319</div>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- left panel -->
+            <aside class="side">
+                <nav>
+                    <button class="navbtn active" data-sec="simp">Simplifier</button>
+                    <button class="navbtn" data-sec="ex">Examples</button>
+                    <button class="navbtn" data-sec="help">Symbols & Laws</button>
+                </nav>
+                <div class="side-note">
+                    Supports up to 6 variables for QM.<br>
+                    K-map shown for 2–4 variables.
+                </div>
+            </aside>
+
+            <!-- main area -->
+            <main class="main-area">
+
+                <!-- SIMPLIFIER SECTION -->
+                <section id="sec-simp" class="section on">
+                    <div class="box">
+                        <div class="box-head">
+                            <h3>Enter Expression</h3>
+                            
+                        </div>
+                        <textarea id="expr" placeholder="Ex: (A and B) or (A' and C)" rows="3" spellcheck="false"></textarea>
+                        <div class="btn-row">
+                            <button id="btn-clear" class="btn ghost">Clear</button>
+                            <button id="btn-go" class="btn primary">Simplify →</button>
+                        </div>
+                        <div class="quick">
+                            <span>Try:</span>
+                            <button class="tag" data-e="A | (A & B)">A ∨ (A∧B)</button>
+                            <button class="tag" data-e="~(A & B)">¬(A∧B)</button>
+                            <button class="tag" data-e="A ^ B">A ⊕ B</button>
+                            <button class="tag" data-e="(A & B) | (~A & C) | (B & C)">Consensus</button>
+                            <button class="tag" data-e="(A & B) | (A & ~B) | (~A & B)">3-term SOP</button>
+                        </div>
+                    </div>
+
+                    <!-- Symbol meanings - always visible -->
+                    <div class="box">
+                        <div class="box-head"><h3>Expression Symbols and Meaning</h3></div>
+                        <div class="sym-grid">
+                            <div class="sym-item"><code>A'</code><span>NOT A</span></div>
+                            <div class="sym-item"><code>~A</code><span>NOT A</span></div>
+                            <div class="sym-item"><code>!A</code><span>NOT A</span></div>
+                            <div class="sym-item"><code>¬A</code><span>NOT A</span></div>
+                            <div class="sym-item"><code>&amp;</code><span>AND</span></div>
+                            <div class="sym-item"><code>.</code><span>AND</span></div>
+                            <div class="sym-item"><code>∧</code><span>AND</span></div>
+                            <div class="sym-item"><code>and</code><span>AND</span></div>
+                            <div class="sym-item"><code>|</code><span>OR</span></div>
+                            <div class="sym-item"><code>+</code><span>OR</span></div>
+                            <div class="sym-item"><code>∨</code><span>OR</span></div>
+                            <div class="sym-item"><code>or</code><span>OR</span></div>
+                            <div class="sym-item"><code>^</code><span>XOR</span></div>
+                            <div class="sym-item"><code>⊕</code><span>XOR</span></div>
+                            <div class="sym-item"><code>xor</code><span>XOR</span></div>
+                            <div class="sym-item"><code>-&gt;</code><span>Implies</span></div>
+                            <div class="sym-item"><code>→</code><span>Implies</span></div>
+                            <div class="sym-item"><code>&lt;-&gt;</code><span>Equivalent</span></div>
+                            <div class="sym-item"><code>↔</code><span>Equivalent</span></div>
+                            <div class="sym-item"><code>nand</code><span>NAND</span></div>
+                            <div class="sym-item"><code>nor</code><span>NOR</span></div>
+                            <div class="sym-item"><code>1</code><span>True</span></div>
+                            <div class="sym-item"><code>0</code><span>False</span></div>
+                        </div>
+                    </div>
+
+                    <div id="err" class="err-box" style="display:none;"></div>
+
+                    <div id="out" style="display:none;">
+                        <!-- result summary -->
+                        <div class="box result-box">
+                            <div class="box-head">
+                                <h3>Simplified Result</h3>
+                            </div>
+                            <div id="res-main" class="big-res">—</div>
+                            <div id="res-meta" class="meta-line"></div>
+                        </div>
+
+                        <div class="two-col">
+                            <div class="box">
+                                <div class="box-head"><h3>Minimal SOP (Sum of Products)</h3></div>
+                                <div id="res-sop" class="mono-res">—</div>
+                            </div>
+                            <div class="box">
+                                <div class="box-head"><h3>Minimal POS (Product of Sums)</h3></div>
+                                <div id="res-pos" class="mono-res">—</div>
+                            </div>
+                        </div>
+
+                        <!-- K-MAP -->
+                        <div class="box" id="kmap-box" style="display:none;">
+                            <div class="box-head"><h3>Karnaugh Map</h3></div>
+                            <div id="kmap-area"></div>
+                            <p class="hint">Gray code ordering is used for rows and columns.</p>
+                        </div>
+
+                        <!-- QUINE-McCLUSKEY STEPS -->
+                        <div class="box" id="qm-box" style="display:none;">
+                            <div class="box-head"><h3>Quine–McCluskey Method (Steps)</h3></div>
+                            <div id="qm-steps"></div>
+                        </div>
+
+                        <!-- Truth table -->
+                        <div class="box" id="tt-box" style="display:none;">
+                            <div class="box-head">
+                                <h3>Truth Table</h3>
+                                <span id="tt-warn" class="warn"></span>
+                            </div>
+                            <div class="tbl-wrap">
+                                <table id="ttable">
+                                    <thead></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- EXAMPLES -->
+                <section id="sec-ex" class="section">
+                    <div class="box">
+                        <div class="box-head"><h3>Example Expressions</h3></div>
+                        <div id="ex-list" class="ex-list"></div>
+                    </div>
+                </section>
+
+                <!-- HELP -->
+                <section id="sec-help" class="section">
+                    <div class="box">
+                        <h3>List of Symbols and Meaning</h3>
+                        <table class="ref">
+                            <tr><td><code>A'</code> &nbsp;or&nbsp; <code>~A</code> &nbsp;or&nbsp; <code>!A</code> &nbsp;or&nbsp; <code>not A</code></td><td>NOT A (complement / negation)</td></tr>
+                            <tr><td><code>&amp;</code> &nbsp;or&nbsp; <code>.</code> &nbsp;or&nbsp; <code>and</code> &nbsp;or&nbsp; <code>∧</code></td><td>AND (product)</td></tr>
+                            <tr><td><code>|</code> &nbsp;or&nbsp; <code>+</code> &nbsp;or&nbsp; <code>or</code> &nbsp;or&nbsp; <code>∨</code></td><td>OR (sum)</td></tr>
+                            <tr><td><code>^</code> &nbsp;or&nbsp; <code>xor</code> &nbsp;or&nbsp; <code>⊕</code></td><td>XOR (exclusive OR)</td></tr>
+                            <tr><td><code>-&gt;</code> &nbsp;or&nbsp; <code>→</code></td><td>Implies</td></tr>
+                            <tr><td><code>&lt;-&gt;</code> &nbsp;or&nbsp; <code>↔</code></td><td>Equivalence</td></tr>
+                            <tr><td><code>nand</code></td><td>NAND (NOT AND)</td></tr>
+                            <tr><td><code>nor</code></td><td>NOR (NOT OR)</td></tr>
+                            <tr><td><code>1</code> / <code>True</code></td><td>Logic HIGH / always true</td></tr>
+                            <tr><td><code>0</code> / <code>False</code></td><td>Logic LOW / always false</td></tr>
+                        </table>
+                        <p style="margin-top:12px; font-size:0.85rem; color:var(--muted);">
+                            <strong>Note:</strong> <code>A'</code> is the common textbook way to write NOT A.
+                            You can also write <code>~A</code>, <code>!A</code> or <code>not A</code>.
+                            Some books use <code>+</code> for OR and <code>.</code> for AND.
+                        </p>
+                    </div>
+                    <div class="two-col">
+                        <div class="box">
+                            <h3>SOP and POS</h3>
+                            <table class="ref">
+                                <tr><td><strong>SOP</strong></td><td>Sum of Products (OR of AND terms)</td></tr>
+                                <tr><td><strong>POS</strong></td><td>Product of Sums (AND of OR terms)</td></tr>
+                                <tr><td>Minimal SOP</td><td>SOP with fewest terms / literals</td></tr>
+                                <tr><td>Minimal POS</td><td>POS with fewest terms / literals</td></tr>
+                            </table>
+                        </div>
+                        <div class="box">
+                            <h3>Basic Laws</h3>
+                            <table class="ref">
+                                <tr><td>Idempotent</td><td>A ∧ A = A</td></tr>
+                                <tr><td>Absorption</td><td>A ∨ (A ∧ B) = A</td></tr>
+                                <tr><td>De Morgan</td><td>¬(A ∧ B) = ¬A ∨ ¬B</td></tr>
+                                <tr><td>Complement</td><td>A ∨ ¬A = 1</td></tr>
+                                <tr><td>Consensus</td><td>(A∧B)∨(¬A∧C)∨(B∧C) = (A∧B)∨(¬A∧C)</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="box">
+                        <h3>About this project</h3>
+                        <p style="color:var(--muted); font-size:0.92rem; line-height:1.6;">
+                            This tool was made as a minor project for understanding Boolean algebra simplification.
+                            It implements the Quine-McCluskey tabular method and shows Karnaugh maps for 2–4 variables.
+                            SymPy is used as a reference for the final simplified form.
+                            <br><br>
+                            <strong>Submitted by:</strong> NIRAJ VERMA &nbsp;|&nbsp; Scholar No: 319
+                        </p>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+
+        <footer class="foot">
+            Boolean Expression Simplifier · Minor Project · NIRAJ VERMA (319)
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

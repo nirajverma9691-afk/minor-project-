@@ -26,23 +26,54 @@ app = Flask(__name__)
 
 def preprocess_expression(expr):
     expr = expr.strip()
-    # A' or A\'  ->  ~A   (common textbook notation for NOT)
-    expr = re.sub(r"([A-Za-z_][A-Za-z0-9_]*)'", r"~\1", expr)
+
+    # Convert apostrophe notation into NOT
+    # A' -> ~A, B' -> ~B
+    expr = re.sub(
+        r"([A-Za-z_][A-Za-z0-9_]*)'",
+        r"~\1",
+        expr
+    )
+
     reps = [
-        (r'\bAND\b', '&'), (r'\band\b', '&'),
-        (r'\bOR\b', '|'),  (r'\bor\b', '|'),
-        (r'\bNOT\b', '~'), (r'\bnot\b', '~'),
-        (r'\bXOR\b', '^'), (r'\bxor\b', '^'),
-        (r'\bNAND\b', 'Nand'), (r'\bnand\b', 'Nand'),
-        (r'\bNOR\b', 'Nor'),   (r'\bnor\b', 'Nor'),
-        (r'→', '>>'), (r'->', '>>'), (r'⇒', '>>'),
-        (r'↔', 'Equivalent'), (r'<->', 'Equivalent'), (r'⇔', 'Equivalent'),
-        (r'!', '~'), (r'¬', '~'), (r'∧', '&'), (r'∨', '|'), (r'⊕', '^'),
-        (r'\+', '|'),   # some books use + for OR
-        (r'\.', '&'),   # some books use . for AND
+        (r'\bAND\b', '&'),
+        (r'\band\b', '&'),
+        (r'\bOR\b', '|'),
+        (r'\bor\b', '|'),
+        (r'\bNOT\b', '~'),
+        (r'\bnot\b', '~'),
+        (r'\bXOR\b', '^'),
+        (r'\bxor\b', '^'),
+        (r'\bNAND\b', 'Nand'),
+        (r'\bnand\b', 'Nand'),
+        (r'\bNOR\b', 'Nor'),
+        (r'\bnor\b', 'Nor'),
+        (r'→', '>>'),
+        (r'->', '>>'),
+        (r'⇒', '>>'),
+        (r'↔', 'Equivalent'),
+        (r'<->', 'Equivalent'),
+        (r'⇔', 'Equivalent'),
+        (r'!', '~'),
+        (r'¬', '~'),
+        (r'∧', '&'),
+        (r'∨', '|'),
+        (r'⊕', '^'),
+        (r'\+', '|'),
+        (r'\.', '&'),
     ]
+
     for pat, rep in reps:
         expr = re.sub(pat, rep, expr, flags=re.IGNORECASE)
+
+    # Automatically insert AND between adjacent variables.
+    # Example: ~A~B C becomes ~A & ~B & C
+    expr = re.sub(
+        r'(?<=[A-Za-z0-9_)])\s*(?=[~A-Za-z_])',
+        ' & ',
+        expr
+    )
+
     return expr
 
 
